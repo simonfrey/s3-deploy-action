@@ -17,6 +17,7 @@ Optionally, you can also set the following environment variables:
 - `AWS_REGION`: The AWS region where your S3 bucket is located. If not set, it defaults to `us-east-1`.
 - `AWS_S3_ENDPOINT`: The endpoint URL for your S3 bucket. This is useful if you are using a custom S3-compatible storage service.
 - `AWS_S3_PREFIX`: An optional prefix for the S3 bucket. If set, files will be uploaded to the specified prefix within the bucket.
+- `NO_ACL`: Do not set `--acl public-read` in the command if set to "true"
 
 ## Clearing CloudFront Cache
 

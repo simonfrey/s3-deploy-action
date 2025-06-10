@@ -13,14 +13,15 @@ function setAwsEnvVariables(
   process.env.AWS_S3_ENDPOINT = endpoint;
 }
 
-function syncFilesToS3(bucketName: string, sourceDir: string, prefix: string, endpoint?: string) {
+function syncFilesToS3(bucketName: string, sourceDir: string, prefix: string, setACL: boolean, endpoint?: string) {
   try {
     const destination = prefix ? `s3://${bucketName}/${prefix}` : `s3://${bucketName}`;
     console.log(`Syncing files from ${sourceDir} to S3 bucket: ${destination}`);
     console.log(`Using endpoint: ${endpoint}`);
     const endpointParam = endpoint ? `--endpoint-url ${endpoint}` : "";
+    const aclParam = setACL ? "--acl public-read" : "";
     execSync(
-      `aws s3 sync ${sourceDir} ${destination} --no-progress --acl public-read ${endpointParam}`,
+      `aws s3 sync ${sourceDir} ${destination} --no-progress ${setACL} ${endpointParam}`,
       { stdio: "inherit" }
     );
   } catch (error) {
@@ -57,10 +58,11 @@ async function run() {
     );
     const prefix = core.getInput("AWS_S3_PREFIX") || "";
     const endpoint = core.getInput("AWS_S3_ENDPOINT") || "";
+    const NO_ACL = core.getInput("NO_ACL") == "true";
 
     setAwsEnvVariables(accessKeyId, secretAccessKey, region, endpoint);
 
-    syncFilesToS3(bucketName, sourceDir, prefix, endpoint);
+    syncFilesToS3(bucketName, sourceDir, prefix, !NO_ACL, endpoint);
 
     if (cloudfrontDistributionId) {
       invalidateCloudFrontCache(cloudfrontDistributionId);
