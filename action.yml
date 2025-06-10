@@ -1,4 +1,4 @@
-name: "S3 Deploy Github Action"
+name: "S3 Deploy Github Action With ACL Disabled"
 description: "Deploy a directory to an S3 bucket using the AWS CLI."
 author: andrewdex
 
