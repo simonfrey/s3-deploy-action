@@ -21,7 +21,7 @@ function syncFilesToS3(bucketName: string, sourceDir: string, prefix: string, se
     const endpointParam = endpoint ? `--endpoint-url ${endpoint}` : "";
     const aclParam = setACL ? "--acl public-read" : "";
     execSync(
-      `aws s3 sync ${sourceDir} ${destination} --no-progress ${setACL} ${endpointParam}`,
+      `aws s3 sync ${sourceDir} ${destination} --no-progress ${aclParam} ${endpointParam}`,
       { stdio: "inherit" }
     );
   } catch (error) {
