@@ -25674,7 +25674,7 @@ function syncFilesToS3(bucketName, sourceDir, prefix, setACL, endpoint) {
         console.log(`Using endpoint: ${endpoint}`);
         const endpointParam = endpoint ? `--endpoint-url ${endpoint}` : "";
         const aclParam = setACL ? "--acl public-read" : "";
-        (0, child_process_1.execSync)(`aws s3 sync ${sourceDir} ${destination} --no-progress ${setACL} ${endpointParam}`, { stdio: "inherit" });
+        (0, child_process_1.execSync)(`aws s3 sync ${sourceDir} ${destination} --no-progress ${aclParam} ${endpointParam}`, { stdio: "inherit" });
     }
     catch (error) {
         core.error("Error syncing files to S3");
