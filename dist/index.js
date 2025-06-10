@@ -11535,6 +11535,14 @@ const { isUint8Array, isArrayBuffer } = __nccwpck_require__(8253)
 const { File: UndiciFile } = __nccwpck_require__(3041)
 const { parseMIMEType, serializeAMimeType } = __nccwpck_require__(4322)
 
+let random
+try {
+  const crypto = __nccwpck_require__(7598)
+  random = (max) => crypto.randomInt(0, max)
+} catch {
+  random = (max) => Math.floor(Math.random(max))
+}
+
 let ReadableStream = globalThis.ReadableStream
 
 /** @type {globalThis['File']} */
@@ -11620,7 +11628,7 @@ function extractBody (object, keepalive = false) {
     // Set source to a copy of the bytes held by object.
     source = new Uint8Array(object.buffer.slice(object.byteOffset, object.byteOffset + object.byteLength))
   } else if (util.isFormDataLike(object)) {
-    const boundary = `----formdata-undici-0${`${Math.floor(Math.random() * 1e11)}`.padStart(11, '0')}`
+    const boundary = `----formdata-undici-0${`${random(1e11)}`.padStart(11, '0')}`
     const prefix = `--${boundary}\r\nContent-Disposition: form-data`
 
     /*! formdata-polyfill. MIT License. Jimmy Wärting <https://jimmy.warting.se/opensource> */
@@ -25659,13 +25667,14 @@ function setAwsEnvVariables(accessKeyId, secretAccessKey, region, endpoint) {
     process.env.AWS_DEFAULT_REGION = region;
     process.env.AWS_S3_ENDPOINT = endpoint;
 }
-function syncFilesToS3(bucketName, sourceDir, prefix, endpoint) {
+function syncFilesToS3(bucketName, sourceDir, prefix, setACL, endpoint) {
     try {
         const destination = prefix ? `s3://${bucketName}/${prefix}` : `s3://${bucketName}`;
         console.log(`Syncing files from ${sourceDir} to S3 bucket: ${destination}`);
         console.log(`Using endpoint: ${endpoint}`);
         const endpointParam = endpoint ? `--endpoint-url ${endpoint}` : "";
-        (0, child_process_1.execSync)(`aws s3 sync ${sourceDir} ${destination} --no-progress --acl public-read ${endpointParam}`, { stdio: "inherit" });
+        const aclParam = setACL ? "--acl public-read" : "";
+        (0, child_process_1.execSync)(`aws s3 sync ${sourceDir} ${destination} --no-progress ${setACL} ${endpointParam}`, { stdio: "inherit" });
     }
     catch (error) {
         core.error("Error syncing files to S3");
@@ -25696,8 +25705,9 @@ function run() {
             const cloudfrontDistributionId = core.getInput("CLOUDFRONT_DISTRIBUTION_ID");
             const prefix = core.getInput("AWS_S3_PREFIX") || "";
             const endpoint = core.getInput("AWS_S3_ENDPOINT") || "";
+            const NO_ACL = core.getInput("NO_ACL") == "true";
             setAwsEnvVariables(accessKeyId, secretAccessKey, region, endpoint);
-            syncFilesToS3(bucketName, sourceDir, prefix, endpoint);
+            syncFilesToS3(bucketName, sourceDir, prefix, !NO_ACL, endpoint);
             if (cloudfrontDistributionId) {
                 invalidateCloudFrontCache(cloudfrontDistributionId);
             }
@@ -25813,6 +25823,14 @@ module.exports = require("https");
 
 "use strict";
 module.exports = require("net");
+
+/***/ }),
+
+/***/ 7598:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:crypto");
 
 /***/ }),
 
